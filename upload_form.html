@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Submit Form</h1>
+    <form method="post" action="/api/handle_information">
+        <input type="text" name="bug" placeholder="Whats is the Bug?*" required><br><br>
+        <select name="priority" required>
+            <option value="">Select Priority*</option>
+            <option value="high_priority">High Priority</option>
+            <option value="medium_priority">Medium Priority</option>
+            <option value="low_priority">Low Priority</option>
+        </select><br><br>
+        <textarea name="additional_info" placeholder="Additional Info(Suggested)"></textarea><br><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
+
