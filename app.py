@@ -1,8 +1,12 @@
 from flask import Flask, request, render_template, jsonify
 import json
 import os
+from flask_cors import CORS
+
 
 app = Flask(__name__, template_folder='.')
+
+CORS(app)
 
 @app.route("/")
 def home():
@@ -45,4 +49,4 @@ def handle_information():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True, port=80)
