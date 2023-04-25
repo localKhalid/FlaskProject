@@ -9,26 +9,31 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f8f8f8;
         }
 
-        /* Form */
-        form {
+        /* Form container */
+        .form-container {
             max-width: 400px;
             padding: 20px;
-            background-color: #fff;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
             border-radius: 5px;
             text-align: center;
         }
 
         /* Heading */
-        form h1 {
+        .form-container h1 {
             font-size: 24px;
             text-decoration: underline;
         }
 
+        /* Form */
+        .form-container form {
+            margin-top: 20px;
+        }
+
         /* Form input fields */
-        form input, form select, form textarea {
+        .form-container input, .form-container select, .form-container textarea {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
@@ -37,7 +42,7 @@
         }
 
         /* Form submit button */
-        form input[type="submit"] {
+        .form-container input[type="submit"] {
             background-color: #007bff;
             color: #fff;
             border: none;
@@ -52,20 +57,22 @@
     </style>
 </head>
 <body>
-    <form method="post" action="/api/handle_information">
+    <div class="form-container">
         <h1>Submit Form</h1>
-        <input type="text" name="bug" placeholder="What is the Bug?*" required><br><br>
-        <select name="priority" required>
-            <option value="">Select Priority*</option>
-            <option value="high_priority">High Priority</option>
-            <option value="medium_priority">Medium Priority</option>
-            <option value="low_priority">Low Priority</option>
-        </select><br><br>
-        <textarea name="additional_info" placeholder="Additional Info (Suggested)"></textarea><br><br>
-        <input type="submit" value="Submit">
-    </form>
-    <div class="success-message">
-        <p>Your bug form has been accepted. Thank you!</p>
+        <form method="post" action="/api/handle_information">
+            <input type="text" name="bug" placeholder="What is the Bug?*" required><br><br>
+            <select name="priority" required>
+                <option value="">Select Priority*</option>
+                <option value="high_priority">High Priority</option>
+                <option value="medium_priority">Medium Priority</option>
+                <option value="low_priority">Low Priority</option>
+            </select><br><br>
+            <textarea name="additional_info" placeholder="Additional Info (Suggested)"></textarea><br><br>
+            <input type="submit" value="Submit">
+        </form>
+        <div class="success-message">
+            <p>Your bug form has been accepted. Thank you!</p>
+        </div>
     </div>
 </body>
 </html>
