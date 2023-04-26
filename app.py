@@ -3,7 +3,7 @@ import json
 import os
 import boto3
 
-app = Flask(__name__, template_folder='.') 
+app = Flask(__name__, template_folder='.')
 
 # Create an SQS client
 sqs = boto3.client('sqs', region_name='eu-north-1')
@@ -45,9 +45,11 @@ def handle_information():
             return jsonify({'message': 'Bug information submitted successfully', 'MessageId': response['MessageId']}), 200
 
         except Exception as e:
+            # Handle error and return response
             return jsonify({'error': 'Failed to submit bug information to the queue', 'details': str(e)}), 500
 
     else:
+        # Handle error and return response
         return jsonify({'error': 'Invalid priority value', 'details': 'Priority value selected in the form is not valid'}), 400
 
 if __name__ == '__main__':
