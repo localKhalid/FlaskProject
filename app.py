@@ -45,12 +45,21 @@ def handle_information():
             return jsonify({'message': 'Bug information submitted successfully', 'MessageId': response['MessageId']}), 200
 
         except Exception as e:
-            # Handle error and return response
             return jsonify({'error': 'Failed to submit bug information to the queue', 'details': str(e)}), 500
 
     else:
-        # Handle error and return response
         return jsonify({'error': 'Invalid priority value', 'details': 'Priority value selected in the form is not valid'}), 400
+
+@app.route('/createQueues', methods=['GET'])
+def create_queues():
+    # Create the High priority queue
+    sqs.create_queue(QueueName='High')
+    # Create the Medium/Low priority queue
+    sqs.create_queue(QueueName='MediumLow')
+    # Create the Dead Letter Queue (DLQ)
+    sqs.create_queue(QueueName='DLQ')
+
+    return jsonify({'message': 'Queues created successfully'}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
