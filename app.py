@@ -37,11 +37,10 @@ def handle_information():
     if queue_name:
         try:
             # Construct the queue URL
-            queue_url = sqs.get_queue_url(QueueName=os.environ.get('SQS_QUEUE_URL_PREFIX') + queue_name)['QueueUrl']
-
+            qURl = sqs.get_queue_url(QueueName=priority)['QueueUrl']
             # Send message to the queue with a 10-second delay
             response = sqs.send_message(
-                QueueUrl=queue_url,
+                QueueUrl= qURl,
                 DelaySeconds=10,
                 MessageBody=json.dumps(bug_form)
             )
