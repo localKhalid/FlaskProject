@@ -1,27 +1,13 @@
-from flask import Flask, request, render_template, jsonify
-import json
+from flask import Flask, render_template, request, jsonify
 import os
 import boto3
+import json
 
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__)
 
-# Create an SQS client
-sqs = boto3.client('sqs', region_name='eu-north-1')
-
-@app.route("/")
+@app.route('/')
 def home():
-    return render_template('upload_form.html')
-
-@app.route('/createQueues', methods=['GET'])
-def create_queues():
-    # Create the High priority queue
-    sqs.create_queue(QueueName='High')
-    # Create the Medium/Low priority queue
-    sqs.create_queue(QueueName='MediumLow')
-    # Create the Dead Letter Queue (DLQ)
-    sqs.create_queue(QueueName='DLQ')
-
-    return jsonify({'message': 'Queues created successfully'}), 200
+    return render_template('index.html')
 
 @app.route('/handle_information', methods=['POST'])
 def handle_information():
@@ -37,27 +23,32 @@ def handle_information():
     }
 
     # Map priority values to queue names
-    priority_mapping = {
+    queue_names = {
         'high_priority': 'High',
         'medium_priority': 'MediumLow',
         'low_priority': 'MediumLow'
     }
 
-    # Get the queue name based on priority
-    queue_name = priority_mapping.get(priority)
+    # Send message to the appropriate queue
+    queue_name = queue_names.get(priority)
+    if queue_name:
+        try:
+            # Create an SQS client
+            sqs = boto3.client('sqs', region_name='eu-north-1')
 
-    if queue_name is not None:
-        # Send the JSON data to the appropriate SQS queue
-        sqs.send_message(
-            QueueUrl=f'https://sqs.{os.environ.get("AWS_REGION", "eu-north-1")}.amazonaws.com/301073929141/{queue_name}',
-            MessageBody=json.dumps(bug_form)
-        )
+            # Send message to the queue
+            response = sqs.send_message(
+                QueueUrl=os.environ.get('SQS_QUEUE_URL_PREFIX') + queue_name,
+                MessageBody=json.dumps(bug_form)
+            )
 
-        # SEND INFORMATION TO ANOTHER API?????
-        return jsonify({'message': 'Your bug form has been accepted. Thank you'}), 200
+            return jsonify({'message': 'Bug information submitted successfully', 'MessageId': response['MessageId']}), 200
+
+        except Exception as e:
+            return jsonify({'error': 'Failed to submit bug information to the queue', 'details': str(e)}), 500
+
     else:
-        return jsonify({'error': 'Invalid priority value'}), 400
-
+        return jsonify({'error': 'Invalid priority value', 'details': 'Priority value selected in the form is not valid'}), 400
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=80)
+    app.run(debug=True)
