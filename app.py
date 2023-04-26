@@ -41,6 +41,7 @@ def handle_information():
 def sendtoqueues(priority, queue_names, sqs, bug_form):
     """
     Sends bug information to an appropriate queue based on priority.
+    If no priority is selected, sends the bug information to the Dead Letter Queue (DLQ).
 
     Args:
         priority (str): Priority value for the bug.
@@ -51,24 +52,24 @@ def sendtoqueues(priority, queue_names, sqs, bug_form):
     Returns:
         Flask response: Flask response object with appropriate status code and message.
     """
-    # Get the queue name based on priority
-    queue_name = queue_names.get(priority)
-    if queue_name:
-        try:
-            # Construct the queue URL
-            qURl = sqs.get_queue_url(QueueName=queue_name)['QueueUrl']
-            # Send message to the queue with a 10-second delay
-            response = sqs.send_message(
-                QueueUrl=qURl,
-                DelaySeconds=10,
-                MessageBody=json.dumps(bug_form)
-            )
+    # Get the queue name based on priority, or default to DLQ
+    queue_name = queue_names.get(priority, 'DLQ')
+    try:
+        # Construct the queue URL
+        qURl = sqs.get_queue_url(QueueName=queue_name)['QueueUrl']
+        # Send message to the queue with a 10-second delay
+        response = sqs.send_message(
+            QueueUrl=qURl,
+            DelaySeconds=10,
+            MessageBody=json.dumps(bug_form)
+        )
 
-            return jsonify(
-                {'message': 'Bug information submitted successfully', 'MessageId': response['MessageId']}), 200
+        return jsonify(
+            {'message': 'Bug information submitted successfully', 'MessageId': response['MessageId']}), 200
 
-        except Exception as e:
-            return jsonify({'error': 'Failed to submit bug information to the queue', 'details': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': 'Failed to submit bug information to the queue', 'details': str(e)}), 500
+
 
     else:
         return jsonify(
