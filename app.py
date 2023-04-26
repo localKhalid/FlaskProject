@@ -34,7 +34,24 @@ def handle_information():
         'low_priority': 'MediumLow'
     }
 
-    # Send message to the appropriate queue
+    # Call sendtoqueues function to send bug information to appropriate queue
+    return sendtoqueues(priority, queue_names, sqs, bug_form)
+
+
+def sendtoqueues(priority, queue_names, sqs, bug_form):
+    """
+    Sends bug information to an appropriate queue based on priority.
+
+    Args:
+        priority (str): Priority value for the bug.
+        queue_names (dict): Dictionary mapping priority values to queue names.
+        sqs (SQS client): AWS Simple Queue Service (SQS) client.
+        bug_form (dict): Bug information in JSON format.
+
+    Returns:
+        Flask response: Flask response object with appropriate status code and message.
+    """
+    # Get the queue name based on priority
     queue_name = queue_names.get(priority)
     if queue_name:
         try:
