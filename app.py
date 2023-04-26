@@ -1,63 +1,36 @@
-from flask import Flask, request, render_template, jsonify
-import json
-import os
-import boto3
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bug Form</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Submit Form</h1>
+        <form method="post" action="/handle_information">
+            <div class="form-group">
+                <label for="bug">Name</label>
+                <input type="text" class="form-control" id="bug" name="bug" placeholder="What is the Bug?*" required>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select class="form-control" id="priority" name="priority" required>
+                    <option value="">Select Priority*</option>
+                    <option value="high_priority">High Priority</option>
+                    <option value="medium_priority">Medium Priority</option>
+                    <option value="low_priority">Low Priority</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="additional_info">Description</label>
+                <textarea class="form-control" id="additional_info" name="additional_info" placeholder="Additional Information (Suggested)"></textarea>
+            </div>
+            <input type="submit" class="btn btn-primary" value="Submit">
+        </form>
+    </div>
 
-app = Flask(__name__, template_folder='.')
-
-# Create an SQS client
-sqs = boto3.client('sqs', region_name='eu-north-1')
-
-@app.route("/")
-def home():
-    return render_template('upload_form.html')
-
-@app.route('/createQueues', methods=['GET'])
-def create_queues():
-    # Create the High priority queue
-    sqs.create_queue(QueueName='High')
-    # Create the Medium/Low priority queue
-    sqs.create_queue(QueueName='MediumLow')
-    # Create the Dead Letter Queue (DLQ)
-    sqs.create_queue(QueueName='DLQ')
-
-    return jsonify({'message': 'Queues created successfully'}), 200
-
-@app.route('/handle_information', methods=['POST'])
-def handle_information():
-    name = request.form.get('bug')
-    priority = request.form.get('priority')
-    additional_info = request.form.get('additional_info')
-
-    # Validate form data
-    bug_form = {
-        'bug': name,
-        'priority': priority,
-        'additional_info': additional_info
-    }
-
-    # Map priority values to queue names
-    priority_mapping = {
-        'high_priority': 'High',
-        'medium_priority': 'MediumLow',
-        'low_priority': 'MediumLow'
-    }
-
-    # Get the queue name based on priority
-    queue_name = priority_mapping.get(priority)
-
-    if queue_name is not None:
-        # Send the JSON data to the appropriate SQS queue
-        sqs.send_message(
-            QueueUrl=f'https://sqs.{os.environ.get("AWS_REGION", "eu-north-1")}.amazonaws.com/301073929141/{queue_name}',
-            MessageBody=json.dumps(bug_form)
-        )
-
-        # SEND INFORMATION TO ANOTHER API?????
-        return jsonify({'message': 'Your bug form has been accepted. Thank you'}), 200
-    else:
-        return jsonify({'error': 'Invalid priority value'}), 400
-
-
-if __name__ == '__main__':
-    app.run()
+    <!-- Include Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+</body>
+</html>
