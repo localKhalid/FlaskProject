@@ -24,9 +24,9 @@ def handle_information():
 
     # Map priority values to queue names
     queue_names = {
-        'high_priority': 'High',
-        'medium_priority': 'MediumLow',
-        'low_priority': 'MediumLow'
+        'high_priority': 'high',
+        'medium_priority': 'medium',
+        'low_priority': 'low'
     }
 
     # Send message to the appropriate queue
@@ -34,11 +34,11 @@ def handle_information():
     if queue_name:
         try:
             # Create an SQS client
-            sqs = boto3.client('sqs', region_name='eu-north-1')
+            sqs = boto3.client('sqs', region_name=os.environ.get('AWS_REGION'))
 
             # Send message to the queue
             response = sqs.send_message(
-                QueueUrl=os.environ.get('SQS_QUEUE_URL_PREFIX') + queue_name,
+                QueueUrl=f'https://sqs.{os.environ.get("AWS_REGION", "eu-north-1")}.amazonaws.com/301073929141/{queue_name}',
                 MessageBody=json.dumps(bug_form)
             )
 
