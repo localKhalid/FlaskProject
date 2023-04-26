@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('upload_form.html')
 
 @app.route('/handle_information', methods=['POST'])
 def handle_information():
