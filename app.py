@@ -1,11 +1,14 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, render_template, jsonify
+import json
 import os
 import boto3
-import json
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.') 
 
-@app.route('/')
+# Create an SQS client
+sqs = boto3.client('sqs', region_name='eu-north-1')
+
+@app.route("/")
 def home():
     return render_template('upload_form.html')
 
@@ -24,21 +27,18 @@ def handle_information():
 
     # Map priority values to queue names
     queue_names = {
-        'high_priority': 'high',
-        'medium_priority': 'medium',
-        'low_priority': 'low'
+        'high_priority': 'High',
+        'medium_priority': 'MediumLow',
+        'low_priority': 'MediumLow'
     }
 
     # Send message to the appropriate queue
     queue_name = queue_names.get(priority)
     if queue_name:
         try:
-            # Create an SQS client
-            sqs = boto3.client('sqs', region_name=os.environ.get('AWS_REGION'))
-
             # Send message to the queue
             response = sqs.send_message(
-                QueueUrl=f'https://sqs.{os.environ.get("AWS_REGION", "eu-north-1")}.amazonaws.com/301073929141/{queue_name}',
+                QueueUrl=os.environ.get('SQS_QUEUE_URL_PREFIX') + queue_name,
                 MessageBody=json.dumps(bug_form)
             )
 
